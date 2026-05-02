@@ -12,11 +12,25 @@ const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
-const corsOptions = process.env.CLIENT_URL
-  ? { origin: process.env.CLIENT_URL, credentials: true }
-  : { origin: true, credentials: true };
+const rawClientUrl = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.replace(/\/+$/, '')
+  : null;
+
+const corsOptions = {
+  origin: rawClientUrl
+    ? (origin, callback) => {
+        if (!origin || origin === rawClientUrl) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS policy: origin '${origin}' is not allowed`));
+        }
+      }
+    : 'https://taskflow-app-production-66f4.up.railway.app',
+  credentials: true,
+};
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 app.get('/health', (req, res) => {
