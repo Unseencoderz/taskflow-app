@@ -12,6 +12,7 @@ const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
+<<<<<<< HEAD
 // Build an allowlist from CLIENT_URL (supports comma-separated list of origins)
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(',').map((o) => o.trim().replace(/\/$/, ''))
@@ -30,10 +31,27 @@ const corsOptions = {
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
+=======
+const rawClientUrl = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.replace(/\/+$/, '')
+  : null;
+
+const corsOptions = {
+  origin: rawClientUrl
+    ? (origin, callback) => {
+        if (!origin || origin === rawClientUrl) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS policy: origin '${origin}' is not allowed`));
+        }
+      }
+    : 'https://taskflow-app-production-66f4.up.railway.app',
+>>>>>>> 8561c73c1189a7749b0f127059737615ff0c4310
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 app.get('/health', (req, res) => {
