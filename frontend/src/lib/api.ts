@@ -44,7 +44,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   const text = await response.text();
-  const payload = text ? JSON.parse(text) : null;
+  let payload: any = null;
+  if (text) {
+    try {
+      payload = JSON.parse(text);
+    } catch (err) {
+      throw new ApiError(response.status, `Received invalid JSON from ${response.url}. Response started with: ${text.slice(0, 50)}`);
+    }
+  }
 
   if (!response.ok) {
     const message =
