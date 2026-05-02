@@ -195,7 +195,8 @@ function ProjectDetailPage() {
 }
 
 function TasksTab({ projectId }: { projectId: string }) {
-  const tasks = useStore((s) => s.tasks.filter((t) => t.projectId === projectId));
+  const allTasks = useStore((s) => s.tasks);
+  const tasks = useMemo(() => allTasks.filter((t) => t.projectId === projectId), [allTasks, projectId]);
   const users = useStore((s) => s.users);
   const project = useStore((s) => s.projects.find((p) => p.id === projectId)!);
   const members = useMemo(

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, FolderKanban } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -21,6 +21,8 @@ export const Route = createFileRoute("/_app/projects")({
 
 function ProjectsPage() {
   const navigate = useNavigate();
+  const matchRoute = useMatchRoute();
+  const isExact = matchRoute({ to: "/projects", fuzzy: false });
   const projects = useStore((s) => s.projects);
   const loadProjects = useStore((s) => s.loadProjects);
   const [query, setQuery] = useState("");
@@ -39,6 +41,10 @@ function ProjectsPage() {
   useEffect(() => {
     loadProjects().catch(() => undefined);
   }, [loadProjects]);
+
+  if (!isExact) {
+    return <Outlet />;
+  }
 
   return (
     <div className="space-y-6">
