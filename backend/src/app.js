@@ -12,9 +12,26 @@ const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
-const corsOptions = process.env.CLIENT_URL
-  ? { origin: process.env.CLIENT_URL, credentials: true }
-  : { origin: true, credentials: true };
+// Build an allowlist from CLIENT_URL (supports comma-separated list of origins)
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((o) => o.trim().replace(/\/$/, ''))
+  : [];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    // If no allowlist is set, allow all origins (dev mode)
+    if (allowedOrigins.length === 0) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+};
 
 app.use(cors(corsOptions));
 app.use(express.json());
